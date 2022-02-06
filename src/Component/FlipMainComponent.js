@@ -11,7 +11,7 @@ export default function FlipMainComponent() {
         setHomePageVisivility((pre) => !pre)
         if (dif == 1) {
             setDifficulty(8)
-            setMoves(4)
+            setMoves(40)
         }
         else if (dif == 2) {
             setDifficulty(16)
