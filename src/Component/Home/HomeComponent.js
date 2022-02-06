@@ -28,9 +28,9 @@ export default function HomeComponent(props) {
                         <button id="btn_card">P</button>
                     </div>
                     <div className="back">
-                        <button onClick={() => props.handlePage(1)}>Easy</button>
-                        <button onClick={() => props.handlePage(2)}>Medium</button>
-                        <button onClick={() => props.handlePage(3)}>Hard</button>
+                        <button onClick={() =>{ props.handlePage(1); props.setHomePageVisivility(false)}}>Easy</button>
+                        <button onClick={() =>{ props.handlePage(2); props.setHomePageVisivility(false)}}>Medium</button>
+                        <button onClick={() =>{ props.handlePage(3); props.setHomePageVisivility(false)}}>Hard</button>
                     </div>
                 </div>
             </div>

@@ -8,7 +8,6 @@ export default function FlipMainComponent() {
     const [difficulty, setDifficulty] = useState(0);
     const [moves, setMoves] = useState(0);
     function handlePage(dif) {
-        setHomePageVisivility((pre) => !pre)
         if (dif == 1) {
             setDifficulty(8)
             setMoves(40)
@@ -27,7 +26,7 @@ export default function FlipMainComponent() {
         <div className="MainComponent">
             {isHonmePageVisible == true ?
                 (
-                    <HomeComponent handlePage={handlePage} />
+                    <HomeComponent handlePage={handlePage} setHomePageVisivility={setHomePageVisivility}/>
                 ) : (
                     <GameComponent handlePage={handlePage} difficulty={difficulty}  moves={moves} handlePage={handlePage} setHomePageVisivility={setHomePageVisivility}/>
                 )}

@@ -10,16 +10,21 @@ export default function GameComponent(props) {
   const [score, setScore] = useState(0);
   const [isResultVisibe, setVisivility] = useState(false)
   const [bestScore, setBestScore] = useState(null);
+  const [flipcnt, setFlipCnt] = useState(0);
   const key = "BEST_SCORE;"
+  let xr=new Array(32)
 
   useEffect(() => {
-    if (ref_div != null) {
-      let cols = "1fr ".repeat(props.difficulty / 4)
-      ref_div.current.style.gridTemplateColumns = cols;
-    }
-    startTimer()
+    //mount
+    let cols = "1fr ".repeat(props.difficulty / 4)
+    ref_div.current.style.gridTemplateColumns = cols;
+    let id =startTimer()
     setArray(getGameUniqueArray())
     setBestScore(getScoreFromLocalStorage())
+    return (
+      //unmount
+      clearInterval(id)
+    )
   }, [])
 
   //8-4,  16-8, 32-16
@@ -33,6 +38,7 @@ export default function GameComponent(props) {
         return pre - 1;
       })
     }, 1000)
+    return id;
   }
 
   function handleClick(event) {
@@ -52,11 +58,13 @@ export default function GameComponent(props) {
           setMoves((m) => m - 1)
           if (lastElement.getAttribute("value") == val) {
             setScore((sc) => sc + 1);
+            setFlipCnt((pre) => {
+              return pre + 2
+            })
             setTimeout(() => {
-
               lastElement.style.visibility = "hidden"
               element.style.visibility = "hidden"
-            }, 1000)
+            }, 500)
             setLastElement(null);
             setSelected(false)
           } else {
@@ -64,7 +72,7 @@ export default function GameComponent(props) {
               element.style.transform = "rotateY(0deg)";
               lastElement.style.transform = "rotateY(0deg)";
               setSelected(false)
-            }, 1000)
+            }, 500)
           }
 
         }
@@ -83,16 +91,18 @@ export default function GameComponent(props) {
         ar[index] = temp;
       }
     }
-    shuffleArray()
+    //shuffleArray()
     return ar;
   }
   function changeLevel() {
-    if (score == props.difficulty / 2)
-      setTimeout(() => {
-        let level = currentLevel();
-        if (level <= 2) props.setHomePageVisivility(true)
+    setTimeout(() => {
+      let level = currentLevel();
+      if (level <= 2) {
+        props.setHomePageVisivility(true)
         props.handlePage(level + 1)
-      }, 4000)
+        props.setHomePageVisivility(false)
+      }
+    }, 4000)
 
   }
   function currentLevel() {
@@ -105,7 +115,6 @@ export default function GameComponent(props) {
   }
   function savetoLocalStorage(val) {
     let level = currentLevel();
-    console.log(level)
     if (val > localStorage.getItem(key + level)) localStorage.setItem(key + level, val);
   }
   function getScoreFromLocalStorage() {
@@ -116,7 +125,7 @@ export default function GameComponent(props) {
     let total = (props.moves * 3)
     let sc = (score / props.difficulty / 2) * 100;
     let curr = sc + timer + moves
-    let res = ((curr / total) * 100).toFixed(2);
+    let res = parseInt((curr / total) * 100);
     savetoLocalStorage(res)
     return res;
   }
@@ -124,32 +133,13 @@ export default function GameComponent(props) {
   function handleShowResult() {
     setVisivility((pre) => !pre);
     setScore(calcOverallScore())
+    changeLevel()
   }
   return (
     <div className="GameComponent">
       <>
-      
-        {timer == 0 || moves == 0 || score == props.difficulty / 2 ? (
-          <div className="div_results_GC">
-            
-            <h1 id="btn_exit_GC" onClick={() => props.handlePage()}>close</h1>
-            {isResultVisibe == true ? (
-              <>
-                <h1>Score Board</h1>
-                <h3>Your Score: {score}</h3>
-                <h3>Best Score: {bestScore}</h3>
-              </>
 
-            ) : (
-              <>
-                <h1 id="Gameover">Game Over</h1>
-                <button id="btn_showRes_GC"onClick={handleShowResult}>Show Results</button>
-              </>
-            )}
-
-            {changeLevel()}
-          </div>
-        ) : (
+        {timer > 0 && moves > 0 && flipcnt < props.difficulty ? (
           <>
             <div className="Nav">
               <div id="appName">Flip Game</div>
@@ -159,15 +149,15 @@ export default function GameComponent(props) {
               </div>
             </div>
 
-            <h1 id="btn_exit_GC" onClick={() => props.handlePage()}>close</h1>
+            <h1 id="btn_exit_GC" onClick={() => props.setHomePageVisivility(true)}>close</h1>
 
             <div className="divMain_grid_GC" ref={ref_div}>
 
               {ar != null ? (
 
-                ar.map((i) => {
+                ar.map((i,j) => {
                   return (
-                    <div className="flip-box" >
+                    <div className="flip-box">
                       <div className="flip-box-inner" onClick={handleClick} value={i}>
                         <div className="flip-box-front" >
                           <h1 id="h1_hide"></h1>
@@ -190,6 +180,25 @@ export default function GameComponent(props) {
 
             </div>
           </>
+
+        ) : (
+          <div className="div_results_GC">
+
+            <h1 id="btn_exit_GC" onClick={() => props.setHomePageVisivility(true)}>close</h1>
+            {isResultVisibe == true ? (
+              <>
+                <h1>Score Board</h1>
+                <h3>Your Score: {score}</h3>
+                <h3>Best Score: {bestScore}</h3>
+              </>
+
+            ) : (
+              <>
+                <h1 id="Gameover">Game Over</h1>
+                <button id="btn_showRes_GC" onClick={() => handleShowResult()}>Show Results</button>
+              </>
+            )}
+          </div>
 
 
         )}
