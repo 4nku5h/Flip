@@ -91,7 +91,7 @@ export default function GameComponent(props) {
         ar[index] = temp;
       }
     }
-    //shuffleArray()
+    shuffleArray()
     return ar;
   }
   function changeLevel() {
