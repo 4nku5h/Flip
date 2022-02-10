@@ -1,39 +1,48 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 
 export default function HomeComponent(props) {
-
-    function handleClick(event) {
-        var element = event.currentTarget;
-        if (element.className === "div_card") {
-            if (element.style.transform == "rotateY(180deg)") {
-                element.style.transform = "rotateY(0deg)";
-            }
-            else {
-                element.style.transform = "rotateY(180deg)";
-            }
-        }
+    const [state, setState] = useState(false)
+    let isHovering=false;
+    function handleOnHover() {
+        setState((pre) => !pre)
+        setTimeout(() => {
+            //setState((pre) => !pre)
+        }, 3000)
     };
 
-    return (
-        <>
-        <h1>Flip Game</h1>
-        <h4>Press [P] to start the Game</h4>
-            <div className="divMain_FMC">
-                <button id="btn_card">F</button>
-                <button id="btn_card">L</button>
-                <button id="btn_card">I</button>
-                <div className="div_card" onClick={handleClick}>
+    function handleClick(){
+        setState(true)
+    }
 
-                    <div className="front">
-                        <button id="btn_card">P</button>
+    function handleHover(d){
+        console.log(d)
+        if(d==false){
+            setState(false)
+        }
+        isHovering=d;
+    }
+    return (
+        <div className="divMain_FMC_Outer">
+            <div className="divMain_FMC">
+
+            <h1 id="h1_FMC">Flip Game</h1>
+                {state == false ? (
+                    <button id="btn_play" onClick={handleClick}>Play Now</button>
+
+                ) : (
+                    <div className="div_level_outer_FMC" onMouseOver={()=>handleHover(true)} onMouseLeave={()=>handleHover(false)}>
+                        <h1>Select Level</h1>
+                        <div className="div_level_FMC">
+                            <button id="level_one" onClick={() => { props.handlePage(1); props.setHomePageVisivility(false) }}>1</button>
+                            <button id="level_two" onClick={() => { props.handlePage(2); props.setHomePageVisivility(false) }}>2</button>
+                            <button id="level_three" onClick={() => { props.handlePage(3); props.setHomePageVisivility(false) }}>3</button>
+                        </div>
                     </div>
-                    <div className="back">
-                        <button onClick={() =>{ props.handlePage(1); props.setHomePageVisivility(false)}}>Easy</button>
-                        <button onClick={() =>{ props.handlePage(2); props.setHomePageVisivility(false)}}>Medium</button>
-                        <button onClick={() =>{ props.handlePage(3); props.setHomePageVisivility(false)}}>Hard</button>
-                    </div>
-                </div>
+                )}
+
+
             </div>
-        </>
+
+        </div>
     )
 }

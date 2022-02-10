@@ -8,37 +8,40 @@ export default function GameComponent(props) {
   const [isSelected, setSelected] = useState(false);
   const [lastElement, setLastElement] = useState(null);
   const [score, setScore] = useState(0);
-  const [isResultVisibe, setVisivility] = useState(false)
   const [bestScore, setBestScore] = useState(null);
   const [flipcnt, setFlipCnt] = useState(0);
   const key = "BEST_SCORE;"
-  let xr=new Array(32)
-
+  let xr = new Array(32)
+  let id = null
+  let clear = false, loadNext=false;
   useEffect(() => {
-    //mount
+    //-------------------MOUNT-------------------
     let cols = "1fr ".repeat(props.difficulty / 4)
     ref_div.current.style.gridTemplateColumns = cols;
-    let id =startTimer()
+    id = startTimer()
     setArray(getGameUniqueArray())
     setBestScore(getScoreFromLocalStorage())
-    return (
-      //unmount
+
+    return () => {
+      //-------------------UN-MOUNT-------------------
       clearInterval(id)
-    )
+      clear=true
+    }
   }, [])
 
   //8-4,  16-8, 32-16
   function startTimer() {
     let id = setInterval(() => {
       setTimer((pre) => {
-        if (pre == 0) {
-          setTimer(0)
+        if (pre == 1) {
+          handleShowResult()
           clearInterval(id)
+          return 0;
         }
         return pre - 1;
       })
     }, 1000)
-    return id;
+    return id
   }
 
   function handleClick(event) {
@@ -55,12 +58,20 @@ export default function GameComponent(props) {
           setSelected(true)
           setLastElement(element)
         } else if (element != lastElement) {
-          setMoves((m) => m - 1)
+          setMoves((m) => {
+            if (m == 1) handleShowResult()
+            return m - 1
+          })
           if (lastElement.getAttribute("value") == val) {
             setScore((sc) => sc + 1);
             setFlipCnt((pre) => {
+              if(pre==props.difficulty-2){
+                handleShowResult()
+                changeLevel()
+              } 
               return pre + 2
             })
+            console.log(flipcnt)
             setTimeout(() => {
               lastElement.style.visibility = "hidden"
               element.style.visibility = "hidden"
@@ -96,13 +107,15 @@ export default function GameComponent(props) {
   }
   function changeLevel() {
     setTimeout(() => {
-      let level = currentLevel();
-      if (level <= 2) {
-        props.setHomePageVisivility(true)
-        props.handlePage(level + 1)
-        props.setHomePageVisivility(false)
+      if (clear == false) {
+        let level = currentLevel();
+        if (level <= 2) {
+          props.setHomePageVisivility(true)
+          props.handlePage(level + 1)
+          props.setHomePageVisivility(false)
+        }
       }
-    }, 4000)
+    }, 5000)
 
   }
   function currentLevel() {
@@ -131,10 +144,9 @@ export default function GameComponent(props) {
   }
 
   function handleShowResult() {
-    setVisivility((pre) => !pre);
     setScore(calcOverallScore())
-    changeLevel()
   }
+
   return (
     <div className="GameComponent">
       <>
@@ -142,20 +154,19 @@ export default function GameComponent(props) {
         {timer > 0 && moves > 0 && flipcnt < props.difficulty ? (
           <>
             <div className="Nav">
-              <div id="appName">Flip Game</div>
+              <h1 id="h1_FMC">Flip Game</h1>
               <div className="div_details_GC">
                 <h3>Moves left : {moves}</h3>
                 <h3>Time left : {timer}</h3>
               </div>
             </div>
 
-            <h1 id="btn_exit_GC" onClick={() => props.setHomePageVisivility(true)}>close</h1>
 
             <div className="divMain_grid_GC" ref={ref_div}>
 
               {ar != null ? (
 
-                ar.map((i,j) => {
+                ar.map((i, j) => {
                   return (
                     <div className="flip-box">
                       <div className="flip-box-inner" onClick={handleClick} value={i}>
@@ -179,25 +190,16 @@ export default function GameComponent(props) {
               }
 
             </div>
+            <h1 id="btn_exit_GC" onClick={() => props.setHomePageVisivility(true)}>close</h1>
           </>
 
         ) : (
-          <div className="div_results_GC">
-
+          <div className="div_results_GC" on>
+            <h1 id="h1_status_GC">{flipcnt==props.difficulty?("You Won"):("Better luck next time")}</h1>
+            <h1>Score Board</h1>
+            <h3>Your Score: {score}</h3>
+            <h3>Best Score: {bestScore}</h3>
             <h1 id="btn_exit_GC" onClick={() => props.setHomePageVisivility(true)}>close</h1>
-            {isResultVisibe == true ? (
-              <>
-                <h1>Score Board</h1>
-                <h3>Your Score: {score}</h3>
-                <h3>Best Score: {bestScore}</h3>
-              </>
-
-            ) : (
-              <>
-                <h1 id="Gameover">Game Over</h1>
-                <button id="btn_showRes_GC" onClick={() => handleShowResult()}>Show Results</button>
-              </>
-            )}
           </div>
 
 
